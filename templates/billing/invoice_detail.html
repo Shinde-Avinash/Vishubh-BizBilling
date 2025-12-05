@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice #{{ invoice.invoice_number }} - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<!-- Ensure CSRF Cookie is set -->
+<div style="display:none;">{% csrf_token %}</div>
+
+<div class="container">
+    <!-- Action Buttons -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;"
+        class="fade-in">
+        <a href="{% url 'invoice_search' %}"
+            style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 0.5rem;">
+            ← Back to Invoices
+        </a>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'invoice_pdf' invoice.pk %}" class="btn btn-primary" target="_blank">
+                📄 Download PDF
+            </a>
+            <button onclick="sendEmail({{ invoice.pk }}, '{{ invoice.customer.email|default:'' }}')"
+                class="btn btn-success" id="email-btn">
+                📧 Send Email
+            </button>
+            <button onclick="window.print()" class="btn btn-secondary">
+                🖨️ Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Invoice Container -->
+    <div class="card fade-in" id="invoice-container" style="max-width: 800px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="text-align: center; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color);">
+            <h2 style="margin-bottom: 0.5rem;">TAX INVOICE</h2>
+        </div>
+
+        <!-- Company Details -->
+        <div style="text-align: center; padding: 1.5rem 0; border-bottom: 2px solid var(--border-color);">
+            <h1 style="color: var(--brand-primary); margin-bottom: 0.5rem; font-size: 1.75rem;">
+                Vishubh BizBilling
+            </h1>
+            <p style="margin: 0.25rem 0;">40 Feet road, Pune, Maharashtra 411001</p>
+            <p style="margin: 0.25rem 0;">
+                <strong>Phone:</strong> +91 9890691272 &nbsp;&nbsp;
+                <strong>GSTIN:</strong> 08AALCR2857A1ZD &nbsp;&nbsp;
+                <strong>PAN:</strong> AVHPC9999A
+            </p>
+        </div>
+
+        <!-- Bill To & Invoice Info -->
+        <div
+            style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: 1.5rem 0; border-bottom: 2px solid var(--border-color);">
+            <div>
+                <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.5rem;">BILL TO</h3>
+                <div style="font-weight: 600; font-size: 1.1rem;">{{ invoice.customer.name }}</div>
+                <div>{{ invoice.customer.get_full_address }}</div>
+                {% if invoice.customer.phone %}
+                <div>Phone: {{ invoice.customer.phone }}</div>
+                {% endif %}
+                {% if invoice.customer.email %}
+                <div>Email: {{ invoice.customer.email }}</div>
+                {% endif %}
+                <div>PAN Number: {{ invoice.customer.pan_number }}</div>
+                <div>GSTIN: {{ invoice.customer.gstin }}</div>
+                <div>Place of Supply: {{ invoice.customer.place_of_supply }}</div>
+            </div>
+            <div style="text-align: right;">
+                <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.5rem;">INVOICE DETAILS</h3>
+                <div style="margin-bottom: 0.25rem;">
+                    <span style="color: var(--text-secondary);">Invoice No</span><br>
+                    <strong>{{ invoice.invoice_number }}</strong>
+                </div>
+                <div>
+                    <span style="color: var(--text-secondary);">Invoice Date</span><br>
+                    <strong>{{ invoice.invoice_date|date:"d F Y" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                <thead>
+                    <tr style="background: var(--brand-gradient); color: white;">
+                        <th style="padding: 0.75rem; text-align: center; border-radius: 6px 0 0 6px;">Sr. No.</th>
+                        <th style="padding: 0.75rem; text-align: left;">Items</th>
+                        <th style="padding: 0.75rem; text-align: center;">Quantity</th>
+                        <th style="padding: 0.75rem; text-align: right;">Price / Unit</th>
+                        <th style="padding: 0.75rem; text-align: right;">Tax / Unit</th>
+                        <th style="padding: 0.75rem; text-align: right; border-radius: 0 6px 6px 0;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.items.all %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem; text-align: center;">{{ forloop.counter }}</td>
+                        <td style="padding: 0.75rem;">{{ item.product.name }}</td>
+                        <td style="padding: 0.75rem; text-align: center;">{{ item.quantity }} {{ item.product.unit }}
+                        </td>
+                        <td style="padding: 0.75rem; text-align: right;">Rs. {{ item.price_per_unit }}</td>
+                        <td style="padding: 0.75rem; text-align: right;">Rs. {{ item.get_tax_per_unit|floatformat:2 }}
+                            ({{ item.tax_percentage }}%)</td>
+                        <td style="padding: 0.75rem; text-align: right;">Rs. {{ item.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <div style="width: 300px;">
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Sub Total</span>
+                    <strong>Rs. {{ invoice.subtotal }}</strong>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Tax</span>
+                    <strong>Rs. {{ invoice.total_tax }}</strong>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Discount</span>
+                    <strong>Rs. {{ invoice.discount }}</strong>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; background: var(--brand-gradient); color: white; border-radius: 6px; margin-top: 0.5rem; padding: 0.75rem;">
+                    <span>Grand Total</span>
+                    <strong>Rs. {{ invoice.grand_total }}</strong>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); margin-top: 0.5rem;">
+                    <span>Received Amount</span>
+                    <strong>Rs. {{ invoice.received_amount }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                    <span>Due Balance</span>
+                    <strong
+                        style="color: {% if invoice.due_balance > 0 %}var(--accent-red){% else %}var(--brand-primary){% endif %};">
+                        Rs. {{ invoice.due_balance }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 3rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            <div style="padding: 1rem; border-right: 1px solid var(--border-color);">
+                <strong>Notes</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    {{ invoice.notes|linebreaksbr }}
+                </p>
+            </div>
+            <div style="padding: 1rem; border-right: 1px solid var(--border-color);">
+                <strong>Terms & Conditions</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    {{ invoice.terms_conditions|linebreaksbr }}
+                </p>
+            </div>
+            <div style="padding: 1rem;">
+                <strong>Authorised Signatory For</strong>
+                <div style="margin-top: 0.5rem; font-weight: 600;">Vishubh BizBilling</div>
+                <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); width: 80%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function sendEmail(invoiceId, defaultEmail) {
+        //Ask for customer email
+        const customerEmail = prompt('Enter customer email address:', defaultEmail || '');
+
+        if (!customerEmail) {
+            return;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(customerEmail)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+
+        const btn = document.getElementById('email-btn');
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Sending...';
+
+        try {
+            const response = await fetch(`/invoice/${invoiceId}/email/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: customerEmail })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                btn.innerHTML = '✅ Sent!';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-secondary');
+                showToast(`Invoice sent successfully to ${customerEmail}!`, 'success');
+            } else {
+                alert('Error: ' + (data.error || 'Failed to send email'));
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        } catch (error) {
+            alert('Error sending email: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // Check for email status in URL
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailSent = urlParams.get('email_sent');
+        const customerEmail = urlParams.get('customer_email');
+
+        if (emailSent === 'true') {
+            showToast(`Invoice generated & email sent to ${customerEmail} successfully!`, 'success', 10000);
+        } else if (emailSent === 'false') {
+            showToast(`Invoice generated but failed to send email to ${customerEmail}. Check configuration.`, 'error', 10000);
+        }
+
+        // Clean up URL
+        if (emailSent !== null) {
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    });
+</script>
+
+<style>
+    @media print {
+
+        .navbar,
+        .fade-in>div:first-child,
+        #email-btn,
+        button {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vishubh BizBilling - Smart Invoice Generator & Product Management System">
+    <title>{% block title %}Vishubh BizBilling{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="{% url 'index' %}" class="navbar-brand">
+                🧾 Vishubh BizBilling
+            </a>
+
+            <ul class="navbar-nav">
+                <li><a href="{% url 'index' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">🏠
+                        Home</a></li>
+                <li><a href="{% url 'product_list' %}"
+                        class="nav-link {% if 'products' in request.path %}active{% endif %}">📦 Products</a></li>
+                <li><a href="{% url 'invoice_search' %}"
+                        class="nav-link {% if 'invoices' in request.path %}active{% endif %}">🔍 Invoices</a></li>
+                <li><a href="{% url 'statistics' %}"
+                        class="nav-link {% if 'statistics' in request.path %}active{% endif %}">📊 Statistics</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle">
+                        <span class="theme-toggle-icon">🌙</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="min-height: calc(100vh - 80px); padding: 2rem 0;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

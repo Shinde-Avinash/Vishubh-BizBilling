@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Statistics - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1
+                style="font-size: 1.5rem; margin: 0; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                📊 Dashboard
+            </h1>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Business Overview</p>
+        </div>
+        <div
+            style="font-size: 0.9rem; color: var(--text-secondary); background: var(--bg-secondary); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--border-color);">
+            📅 {% now "F Y" %}
+        </div>
+    </div>
+
+    <!-- Key Metrics Grid -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+
+        <!-- Total Revenue -->
+        <div class="card card-glass" style="position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; padding: 1rem; opacity: 0.1; font-size: 4rem;">💰</div>
+            <div class="card-body" style="padding: 1.25rem;">
+                <div
+                    style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Total Revenue</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--brand-primary); margin: 0.25rem 0;">
+                    Rs. {{ total_revenue|floatformat:0|intcomma }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Lifetime Sales</div>
+            </div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="card card-glass" style="position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; padding: 1rem; opacity: 0.1; font-size: 4rem;">⏳</div>
+            <div class="card-body" style="padding: 1.25rem;">
+                <div
+                    style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Pending</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-red); margin: 0.25rem 0;">
+                    Rs. {{ pending_payments|floatformat:0|intcomma }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">To be collected</div>
+            </div>
+        </div>
+
+        <!-- This Month -->
+        <div class="card card-glass" style="position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; padding: 1rem; opacity: 0.1; font-size: 4rem;">📅</div>
+            <div class="card-body" style="padding: 1.25rem;">
+                <div
+                    style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    This Month</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #8e44ad; margin: 0.25rem 0;">
+                    Rs. {{ month_revenue|floatformat:0|intcomma }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ month_invoices_count }} invoices</div>
+            </div>
+        </div>
+
+        <!-- Total Invoices -->
+        <div class="card card-glass" style="position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; padding: 1rem; opacity: 0.1; font-size: 4rem;">📄</div>
+            <div class="card-body" style="padding: 1.25rem;">
+                <div
+                    style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Invoices</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #f39c12; margin: 0.25rem 0;">
+                    {{ total_invoices }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Generated so far</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;" class="responsive-grid">
+        <!-- Recent Activity -->
+        <div class="card card-glass">
+            <div class="card-header"
+                style="background: transparent; border-bottom: 1px solid var(--border-color); padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600;">🕒 Recent Activity</span>
+                <a href="{% url 'invoice_search' %}"
+                    style="font-size: 0.8rem; color: var(--brand-primary); text-decoration: none;">View All →</a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table class="table table-hover" style="margin: 0; font-size: 0.9rem;">
+                    <thead style="background: var(--bg-secondary);">
+                        <tr>
+                            <th style="padding: 0.75rem 1rem;">Invoice</th>
+                            <th style="padding: 0.75rem 1rem;">Customer</th>
+                            <th style="padding: 0.75rem 1rem; text-align: right;">Amount</th>
+                            <th style="padding: 0.75rem 1rem; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in recent_invoices %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 0.75rem 1rem; font-weight: 600;">
+                                {{ invoice.invoice_number }}
+                            </td>
+                            <td style="padding: 0.75rem 1rem;">{{ invoice.customer.name }}</td>
+                            <td style="padding: 0.75rem 1rem; text-align: right;">
+                                <span>Rs.</span> {{ invoice.grand_total|floatformat:2 }}
+                            </td>
+                            <td style="padding: 0.75rem 1rem; text-align: center;">
+                                {% if invoice.due_balance > 0 %}
+                                <span
+                                    style="background: rgba(231, 76, 60, 0.1); color: var(--accent-red); padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Pending</span>
+                                {% else %}
+                                <span
+                                    style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Paid</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No
+                                recent activity</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Stats & Actions -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Products Card -->
+            <div class="card card-glass" style="display: flex; align-items: center; padding: 1.5rem; gap: 1rem;">
+                <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 50%; font-size: 1.5rem;">📦
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-size: 1.5rem; font-weight: 700;">{{ total_products }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem;">Total Products</div>
+                </div>
+                <a href="{% url 'product_list' %}" class="btn btn-sm btn-secondary">Manage</a>
+            </div>
+
+            <!-- Customers Card -->
+            <div class="card card-glass" style="display: flex; align-items: center; padding: 1.5rem; gap: 1rem;">
+                <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 50%; font-size: 1.5rem;">👥
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-size: 1.5rem; font-weight: 700;">{{ total_customers }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem;">Total Customers</div>
+                </div>
+            </div>
+
+            <!-- Quick Action -->
+            <a href="{% url 'index' %}" class="btn btn-primary"
+                style="text-align: center; padding: 1rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 127, 255, 0.3);">
+                ✨ Create New Invoice
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .responsive-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

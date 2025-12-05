@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Compact Header -->
+    <div style="text-align: center; margin-bottom: 0.75rem;" class="fade-in">
+        <h1
+            style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.2rem; font-size: 1.4rem;">
+            ✨ Smart Invoice Generator
+        </h1>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+            Create professional invoices in seconds
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="responsive-grid">
+        <!-- Left Column -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Product Search -->
+            <div class="card card-glass fade-in">
+                <div class="card-header"
+                    style="background: var(--brand-gradient); color: white; border-radius: 6px 6px 0 0; margin: -0.3rem -0.3rem 0.3rem -0.3rem; padding: 0.4rem 0.5rem;">
+                    🔍 Search Products
+                </div>
+                <div class="card-body">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="product-search" class="search-input" placeholder="Search products..."
+                            autocomplete="off" />
+                        <div id="search-results" class="search-results" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card fade-in" style="flex: 1;">
+                <div class="card-header"
+                    style="background: var(--brand-gradient); color: white; border-radius: 6px 6px 0 0; margin: -0.3rem -0.3rem 0.3rem -0.3rem; padding: 0.4rem 0.5rem;">
+                    👤 Customer Info
+                </div>
+                <div class="card-body">
+                    <form id="customer-form">
+                        <div class="form-group">
+                            <label class="form-label">Name *</label>
+                            <input type="text" name="name" class="form-control" placeholder="Customer name" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" name="email" class="form-control" placeholder="customer@example.com"
+                                required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" rows="2"
+                                placeholder="Additional notes..."></textarea>
+                        </div>
+
+                        <!-- Cart Summary (Moved here) -->
+                        <div id="cart-summary"
+                            style="margin: 1rem 0; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+                        </div>
+
+                        <!-- Generate Invoice Button -->
+                        <div style="margin-top: 0.5rem;">
+                            <button type="button" id="generate-btn" onclick="generateInvoice()" class="btn btn-primary"
+                                style="width: 100%; background: var(--brand-gradient); font-weight: 600; padding: 0.6rem; box-shadow: 0 4px 12px rgba(0, 217, 165, 0.3);">
+                                ✨ Generate Invoice
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Shopping Cart -->
+        <div>
+            <div class="card card-glass fade-in" style="height: 100%; display: flex; flex-direction: column;">
+                <div class="card-header"
+                    style="background: var(--brand-gradient); color: white; border-radius: 6px 6px 0 0; margin: -0.3rem -0.3rem 0.3rem -0.3rem; padding: 0.4rem 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🛒 Cart</span>
+                    <button onclick="cart.clear()" class="btn btn-sm"
+                        style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                        Clear
+                    </button>
+                </div>
+                <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
+                    <div id="cart-items" style="flex: 1; overflow-y: auto; max-height: 500px; min-height: 300px;"></div>
+                    <!-- Cart Summary was here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .responsive-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Enhanced cart display */
+    #cart-items:empty::before {
+        content: "🛒 Cart is empty";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Smooth scrollbar for cart */
+    #cart-items::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #cart-items::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 3px;
+    }
+
+    #cart-items::-webkit-scrollbar-thumb {
+        background: var(--brand-primary);
+        border-radius: 3px;
+    }
+
+    #cart-items::-webkit-scrollbar-thumb:hover {
+        background: var(--brand-secondary);
+    }
+</style>
+{% endblock %}

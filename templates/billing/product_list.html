@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem;"
+        class="fade-in">
+        <h1 style="margin: 0;">📦 Product Management</h1>
+        <input type="text" id="product-filter" class="form-control" style="flex: 1; max-width: 300px;"
+            placeholder="🔍 Search products..." onkeyup="filterProducts()" />
+        <a href="{% url 'product_create' %}" class="btn btn-primary" style="white-space: nowrap;">
+            ➕ Add Product
+        </a>
+    </div>
+
+    <div class="card fade-in">
+        <div class="table-container">
+            <table id="products-table">
+                <thead>
+                    <tr>
+                        <th>Sr</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                        <th>Tax %</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if products %}
+                    {% for product in products %}
+                    <tr class="product-row">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td>{{ product.category|default:"—" }}</td>
+                        <td>{{ product.unit }}</td>
+                        <td>Rs. {{ product.price_per_unit }}</td>
+                        <td>{{ product.tax_percentage }}%</td>
+                        <td>
+                            {% if product.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.3rem;">
+                                <a href="{% url 'product_update' product.pk %}" class="btn btn-secondary btn-sm">
+                                    ✏️
+                                </a>
+                                <a href="{% url 'product_delete' product.pk %}" class="btn btn-danger btn-sm">
+                                    🗑️
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                            <div>No products found</div>
+                            <div style="margin-top: 0.5rem;">
+                                <a href="{% url 'product_create' %}" class="btn btn-primary">
+                                    Add Your First Product
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterProducts() {
+        const input = document.getElementById('product-filter');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('products-table');
+        const rows = table.getElementsByClassName('product-row');
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const text = row.textContent || row.innerText;
+            if (text.toLowerCase().indexOf(filter) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    }
+</script>
+{% endblock %}

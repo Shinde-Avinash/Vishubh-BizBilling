@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if product %}Edit{% else %}Add{% endif %} Product - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;" class="fade-in">
+            <a href="{% url 'product_list' %}"
+                style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                ← Back to Products
+            </a>
+            <h1>{% if product %}✏️ Edit Product{% else %}➕ Add New Product{% endif %}</h1>
+        </div>
+
+        <div class="card fade-in">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Product Name *</label>
+                    <input type="text" name="name" class="form-control"
+                        value="{% if product %}{{ product.name }}{% endif %}" placeholder="e.g., Apple, Orange, Rice"
+                        required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input type="text" name="category" class="form-control"
+                        value="{% if product %}{{ product.category }}{% endif %}"
+                        placeholder="e.g., Fruits, Vegetables, Grains" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Unit *</label>
+                    <select name="unit" class="form-control" required>
+                        {% for value, label in unit_choices %}
+                        <option value="{{ value }}" {% if product and product.unit == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Price Per Unit (Rs.) *</label>
+                    <input type="number" name="price_per_unit" class="form-control"
+                        value="{% if product %}{{ product.price_per_unit }}{% endif %}" step="0.01" min="0.01"
+                        placeholder="100.00" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tax Percentage (%) *</label>
+                    <input type="number" name="tax_percentage" class="form-control"
+                        value="{% if product %}{{ product.tax_percentage }}{% else %}5{% endif %}" step="0.01" min="0"
+                        max="100" placeholder="5.00" required />
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        ✅ {% if product %}Update Product{% else %}Add Product{% endif %}
+                    </button>
+                    <a href="{% url 'product_list' %}" class="btn btn-secondary" style="flex: 1;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

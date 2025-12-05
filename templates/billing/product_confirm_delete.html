@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Product - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <div class="card fade-in">
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+
+                <h2 style="margin-bottom: 1rem;">Delete Product?</h2>
+
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Are you sure you want to delete <strong>{{ product.name }}</strong>?
+                    This action cannot be undone.
+                </p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary" style="flex: 1;">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger" style="flex: 1;">
+                            🗑️ Delete Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Invoice Search - Vishubh BizBilling{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem;"
+        class="fade-in">
+        <h1 style="margin: 0;">🔍 Invoice Search & History</h1>
+        <form method="GET" action="{% url 'invoice_search' %}"
+            style="display: flex; gap: 0.5rem; flex: 1; max-width: 400px;">
+            <input type="text" name="q" class="form-control" placeholder="🔍 Search invoices..." value="{{ query }}" />
+            <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Search</button>
+        </form>
+    </div>
+
+    <div class="card fade-in">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice No.</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Date</th>
+                        <th>Grand Total</th>
+                        <th>Due Balance</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if invoices %}
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><strong>{{ invoice.invoice_number }}</strong></td>
+                        <td>{{ invoice.customer.name }}</td>
+                        <td>{{ invoice.customer.phone }}</td>
+                        <td>{{ invoice.invoice_date|date:"d M Y" }}</td>
+                        <td><strong>Rs. {{ invoice.grand_total|floatformat:2 }}</strong></td>
+                        <td>
+                            {% if invoice.due_balance > 0 %}
+                            <b style="color: #E74C3C;">{{ invoice.due_balance|floatformat:2 }}</b>
+                            {% else %}
+                            <b style="color: #2ECC71;">0.00</b>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if invoice.email_sent %}
+                            <span class="badge badge-success">✓ Sent</span>
+                            {% else %}
+                            <span class="badge badge-warning">Not Sent</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{% url 'invoice_detail' invoice.pk %}" class="btn btn-secondary btn-sm">
+                                    👁️ View
+                                </a>
+                                <a href="{% url 'invoice_pdf' invoice.pk %}" class="btn btn-primary btn-sm"
+                                    target="_blank">
+                                    📄 PDF
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                            {% if query %}
+                            <div style="font-size: 1.125rem;">No invoices found for "{{ query }}"</div>
+                            <div style="margin-top: 1rem;">
+                                <a href="{% url 'invoice_search' %}" class="btn btn-secondary">Clear Search</a>
+                            </div>
+                            {% else %}
+                            <div style="font-size: 1.125rem;">No invoices found</div>
+                            <div style="margin-top: 1rem;">
+                                <a href="{% url 'index' %}" class="btn btn-primary">Create Your First Invoice</a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
