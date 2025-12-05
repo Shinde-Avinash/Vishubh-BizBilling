@@ -7,6 +7,7 @@ A lightweight, professional business billing system built with Python, Django, a
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 📌 Project Overview
+<img width="915" height="682" alt="image" src="https://github.com/user-attachments/assets/d50777d4-12af-44a1-af3e-bc969a7b2ba7" />
 
 Vishubh BizBilling is a simple yet powerful billing and inventory management application designed for small and medium businesses. It allows shop owners to:
 
